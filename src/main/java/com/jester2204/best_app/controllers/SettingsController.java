@@ -29,7 +29,7 @@ public class SettingsController {
 
         try {
             DatabaseConnection.setCredentials(url, user, password);
-            mainController.reconnectToDatabase();
+            mainController.connectToDatabase();
             closeDialog();
         } catch (Exception e) {
             // Показать сообщение об ошибке

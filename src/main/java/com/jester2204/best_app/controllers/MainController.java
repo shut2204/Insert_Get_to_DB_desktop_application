@@ -5,6 +5,7 @@ import com.jester2204.best_app.dao.User;
 import com.jester2204.best_app.dao.UserDao;
 import javafx.animation.ScaleTransition;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -12,22 +13,23 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import javafx.fxml.FXMLLoader;
 
 import java.io.IOException;
 
 public class MainController {
-    public TextField randomUserIdField;
-    public TextField randomUserNameField;
-    public TextField randomUserPasswordField;
-    public SVGPath passwordIcon;
     public Button settingsButton;
-
+    public Group setupConfiguration;
+    @FXML private Pane mainPane;
+    @FXML private TextField randomUserIdField;
+    @FXML private TextField randomUserNameField;
+    @FXML private TextField randomUserPasswordField;
+    @FXML private SVGPath passwordIcon;
     @FXML private Rectangle rectangle;
     @FXML private Rectangle rectangle1;
     @FXML private Group group_left;
@@ -40,15 +42,25 @@ public class MainController {
 
     @FXML
     public void initialize() {
+        turnDisableForParts(true);
+
         Tooltip passwordTooltip = new Tooltip("At least 8 characters and at least one special character");
         passwordTooltip.setShowDelay(Duration.millis(100));
         Tooltip.install(passwordIcon, passwordTooltip);
+    }
 
-        try {
-            this.userDao = new UserDao(DatabaseConnection.getConnection());
-        } catch (Exception e) {
-            showAlert("Database Connection Error", "Failed to connect to database: " + e.getMessage(), Alert.AlertType.ERROR);
-        }
+    private void turnDisableForParts(boolean flag) {
+        mainPane.getChildren().forEach(child -> {
+            if (child instanceof Group group) {
+                group.getChildren().forEach(innerChild -> {
+                    if (innerChild != settingsButton) {
+                        innerChild.setDisable(flag);
+                    }
+                });
+            } else if (child != settingsButton) {
+                child.setDisable(flag);
+            }
+        });
     }
     @FXML
     private void handleScale(Group group, Rectangle rectangle, double scale) {
@@ -107,6 +119,23 @@ public class MainController {
             showAlert("Error", "Failed to get random user: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
+    @FXML
+    private void openSettingsDialog() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/jester2204/best_app/settings_dialog.fxml"));
+            Parent parent = fxmlLoader.load();
+            SettingsController settingsController = fxmlLoader.getController();
+            settingsController.setMainController(this);
+
+            Scene scene = new Scene(parent, 300, 200);
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(scene);
+            stage.showAndWait();
+        } catch (IOException e) {
+            showAlert("Error", "Cannot load settings dialog: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
     private void showAlert(String title, String message, Alert.AlertType alertType) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);
@@ -144,30 +173,14 @@ public class MainController {
 
         return password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\|,.<>\\/?].*");
     }
-    public void reconnectToDatabase() {
+    public void connectToDatabase() {
         try {
             userDao = new UserDao(DatabaseConnection.getConnection());
             showAlert("Database Connection Success", "Successes reconnect to database: ", Alert.AlertType.INFORMATION);
+            setupConfiguration.setVisible(false);
+            turnDisableForParts(false);
         } catch (Exception e) {
             showAlert("Database Connection Error", "Failed to reconnect to database: " + e.getMessage(), Alert.AlertType.ERROR);
-        }
-    }
-
-    @FXML
-    private void openSettingsDialog() {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/jester2204/best_app/settings_dialog.fxml"));
-            Parent parent = fxmlLoader.load();
-            SettingsController settingsController = fxmlLoader.getController();
-            settingsController.setMainController(this);
-
-            Scene scene = new Scene(parent, 300, 200);
-            Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setScene(scene);
-            stage.showAndWait();
-        } catch (IOException e) {
-            showAlert("Error", "Cannot load settings dialog: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 }

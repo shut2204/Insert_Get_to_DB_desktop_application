@@ -1,0 +1,24 @@
+.button {
+  -fx-background-color: transparent;
+  -fx-border-color: #FFA500;
+  -fx-border-width: 2;
+  -fx-text-fill: #FFA500;
+  -fx-background-radius: 15;
+  -fx-border-radius: 15;
+  -fx-padding: 8px 16px; /* немного уменьшенный padding */
+  -fx-cursor: hand; /* Курсор в виде руки */
+  -fx-font-weight: bold;
+  -fx-font-size: 14px; /* Меньший размер текста */
+}
+
+.button:hover {
+  -fx-border-color: #cc8400;
+  -fx-text-fill: #cc8400;
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 15, 0.2, 0, 0); /* Тень при наведении */
+}
+
+.button:pressed {
+  -fx-border-color: #996300;
+  -fx-text-fill: #996300;
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0.1, 0, 1); /* Меньшая тень при нажатии */
+}

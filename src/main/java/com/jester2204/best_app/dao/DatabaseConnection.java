@@ -2,18 +2,23 @@ package com.jester2204.best_app.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.Properties;
 
 public class DatabaseConnection {
 
+    private static String url;
+    private static String user;
+    private static String password;
+
+    public static void setCredentials(String dbUrl, String dbUser, String dbPassword) {
+        url = dbUrl;
+        user = dbUser;
+        password = dbPassword;
+    }
+
     public static Connection getConnection() throws Exception {
-        Properties properties = new Properties();
-        properties.load(DatabaseConnection.class.getClassLoader().getResourceAsStream("application.properties"));
-
-        String url = properties.getProperty("database.url");
-        String user = properties.getProperty("database.user");
-        String password = properties.getProperty("database.password");
-
+        if (url == null || user == null || password == null) {
+            throw new IllegalStateException("Database credentials not set!");
+        }
         return DriverManager.getConnection(url, user, password);
     }
 }

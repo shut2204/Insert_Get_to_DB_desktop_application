@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Text?>
+
+<GridPane fx:controller="com.jester2204.best_app.controllers.SettingsController"
+          xmlns:fx="http://javafx.com/fxml" alignment="CENTER" hgap="10" vgap="10">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    <Text text="Database URL:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+    <TextField fx:id="dbUrlField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+    <Text text="Username:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+    <TextField fx:id="dbUserField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+    <Text text="Password:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+    <PasswordField fx:id="dbPasswordField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+    <HBox spacing="10" alignment="BOTTOM_RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="3">
+        <Button text="OK" onAction="#applySettings"/>
+        <Button text="Cancel" onAction="#closeDialog"/>
+    </HBox>
+</GridPane>

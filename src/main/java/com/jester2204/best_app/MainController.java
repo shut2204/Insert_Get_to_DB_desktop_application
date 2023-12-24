@@ -8,13 +8,16 @@ import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.SVGPath;
 import javafx.util.Duration;
 
 public class MainController {
     public TextField randomUserIdField;
     public TextField randomUserNameField;
     public TextField randomUserPasswordField;
+    public SVGPath passwordIcon;
 
     @FXML private Rectangle rectangle;
     @FXML private Rectangle rectangle1;
@@ -27,6 +30,18 @@ public class MainController {
     private UserDao userDao;
 
     @FXML
+    public void initialize() {
+        Tooltip passwordTooltip = new Tooltip("At least 8 characters and at least one special character");
+        passwordTooltip.setShowDelay(Duration.millis(100));
+        Tooltip.install(passwordIcon, passwordTooltip);
+
+        try {
+            this.userDao = new UserDao(DatabaseConnection.getConnection());
+        } catch (Exception e) {
+            showAlert("Database Connection Error", "Failed to connect to database: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+    @FXML
     private void handleScale(Group group, Rectangle rectangle, double scale) {
         ScaleTransition st = new ScaleTransition(Duration.millis(600), rectangle);
         group.toFront();
@@ -34,27 +49,22 @@ public class MainController {
         st.setToY(scale);
         st.play();
     }
-
     @FXML
     private void leftMoreThenRight() {
         handleScale(group_left, rectangle, 1.4);
     }
-
     @FXML
     private void leftReturnToNormalSize() {
         handleScale(group_left, rectangle, 1.0);
     }
-
     @FXML
     private void rightMoreThenLeft() {
         handleScale(group_right, rectangle1, 1.4);
     }
-
     @FXML
     private void rightReturnToNormalSize() {
         handleScale(group_right, rectangle1, 1.0);
     }
-
     @FXML
     private void saveUser() {
         // Получаем данные из текстовых полей
@@ -62,26 +72,8 @@ public class MainController {
         String userName = userNameField.getText();
         String userPassword = userPasswordField.getText();
 
-        // Проверяем, что поля не пустые
-        if (userIdText.isEmpty() || userName.isEmpty() || userPassword.isEmpty()) {
-            showAlert("Validation Error", "All fields must be filled!", Alert.AlertType.WARNING);
-            return;
-        }
-
-        // Проверяем, что пароль соответствует требованиям
-        if (!isPasswordValid(userPassword)) {
-            showAlert("Validation Error", "Password must be at least 8 characters long and contain at least one special character!", Alert.AlertType.WARNING);
-            return;
-        }
-
-        // Преобразуем ID пользователя в число
-        int userId;
-        try {
-            userId = Integer.parseInt(userIdText);
-        } catch (NumberFormatException e) {
-            showAlert("Validation Error", "User ID must be a number!", Alert.AlertType.WARNING);
-            return;
-        }
+        Integer userId = validateFields(userIdText, userName, userPassword);
+        if (userId == null) return;
 
         // Создаем объект пользователя
         User user = new User(userId, userName, userPassword);
@@ -92,14 +84,6 @@ public class MainController {
             showAlert("Success", "User saved successfully!", Alert.AlertType.CONFIRMATION);
         } catch (Exception e) {
             showAlert("Error", "Failed to save user: " + e.getMessage(), Alert.AlertType.ERROR);
-        }
-    }
-    @FXML
-    public void initialize() {
-        try {
-            this.userDao = new UserDao(DatabaseConnection.getConnection());
-        } catch (Exception e) {
-            showAlert("Database Connection Error", "Failed to connect to database: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
     @FXML
@@ -120,6 +104,29 @@ public class MainController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+    private Integer validateFields(String userIdText, String userName, String userPassword) {
+        // Проверяем, что поля не пустые
+        if (userIdText.isEmpty() || userName.isEmpty() || userPassword.isEmpty()) {
+            showAlert("Validation Error", "All fields must be filled!", Alert.AlertType.WARNING);
+            return null;
+        }
+
+        // Проверяем, что пароль соответствует требованиям
+        if (!isPasswordValid(userPassword)) {
+            showAlert("Validation Error", "Password must be at least 8 characters long and contain at least one special character!", Alert.AlertType.WARNING);
+            return null;
+        }
+
+        // Преобразуем ID пользователя в число
+        int userId;
+        try {
+            userId = Integer.parseInt(userIdText);
+        } catch (NumberFormatException e) {
+            showAlert("Validation Error", "User ID must be a number!", Alert.AlertType.WARNING);
+            return null;
+        }
+        return userId;
     }
     private boolean isPasswordValid(String password) {
         if (password.length() < 8) {
